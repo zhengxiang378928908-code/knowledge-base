@@ -130,7 +130,9 @@ public class FeignFallbackAspect {
 
 1. `@SpringBootApplication` 包含 `@EnableAutoConfiguration`
 2. `@EnableAutoConfiguration` 通过 `@Import(AutoConfigurationImportSelector.class)` 加载候选配置
-3. `AutoConfigurationImportSelector` 读取 `META-INF/spring.factories`（或 Spring Boot 3 的 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`）
+3. `AutoConfigurationImportSelector` 读取自动配置候选：
+   - Spring Boot 2.x：`META-INF/spring.factories`
+   - Spring Boot 3.x+：`META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`
 4. 根据 `@ConditionalOnXxx` 条件注解过滤，满足条件的配置类生效
 
 **你项目中的应用：**
@@ -143,13 +145,15 @@ public class PmsAutoConfiguration {
     // 引入这个 Starter 依赖后，自动扫描组件和 Mapper
 }
 ```
-在 `META-INF/spring.factories` 中注册这个配置类即可。
+如果项目是 Spring Boot 2.x，就在 `META-INF/spring.factories` 注册；如果是 Spring Boot 3.x+，则放到 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`。
 
 ### 3.2 Spring Boot Starter 开发步骤
 
 1. 创建 `xxx-spring-boot-starter` 模块
 2. 编写自动配置类（`@Configuration` + `@ConditionalOnXxx`）
-3. 在 `META-INF/spring.factories` 注册配置类
+3. 按 Spring Boot 版本注册自动配置类：
+   - 2.x：`META-INF/spring.factories`
+   - 3.x+：`META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`
 4. 其他项目引入依赖即可自动生效
 
 ### 3.3 常用注解
@@ -277,7 +281,7 @@ public interface OrderGenerateFeignClient {
 
 ### 6.2 @Transactional 失效场景
 
-1. **方法不是 public** → AOP 无法代理
+1. **标准代理模式下非 public 方法通常不要依赖事务生效**；最稳妥的是标在 `public` 方法上
 2. **同类方法内部调用** → 绕过了代理，直接调用 this.method()
 3. **异常被 catch 了** → Spring 检测不到异常，不回滚
 4. **抛出非 RuntimeException** → 默认只回滚 RuntimeException（可配置 rollbackFor）

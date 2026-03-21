@@ -47,13 +47,13 @@ SELECT *     FROM user WHERE name = 'Tom';       -- 需要回表
 |------|------|------------|------|
 | READ UNCOMMITTED | ✅ | ✅ | ✅ |
 | READ COMMITTED | ❌ | ✅ | ✅ |
-| REPEATABLE READ（默认） | ❌ | ❌ | ❌（MVCC） |
+| REPEATABLE READ（默认） | ❌ | ❌ | 快照读基本无幻读；当前读依赖 Next-Key Lock |
 | SERIALIZABLE | ❌ | ❌ | ❌ |
 
 ## MVCC
 
 - 每行数据有隐藏列：`trx_id`（创建事务ID）、`roll_pointer`（undo log 指针）
-- **Read View**：事务创建时生成快照
+- **Read View**：快照读时生成 / 使用事务视图
   - RC：每次 SELECT 创建新 Read View
   - RR：第一次 SELECT 创建，后续复用
 
@@ -67,7 +67,7 @@ SELECT *     FROM user WHERE name = 'Tom';       -- 需要回表
 
 ### 按类型
 
-- **共享锁（S）**：`SELECT ... LOCK IN SHARE MODE`
+- **共享锁（S）**：`SELECT ... FOR SHARE`
 - **排他锁（X）**：`SELECT ... FOR UPDATE`
 - **意向锁**：表级，表明事务想要在行上加什么锁
 

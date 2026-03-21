@@ -11,10 +11,12 @@
 | 类型 | 底层实现 | 常用场景 |
 |------|---------|---------|
 | String | SDS（简单动态字符串） | 缓存、计数器、分布式锁 |
-| Hash | ziplist / hashtable | 对象存储、用户信息 |
-| List | quicklist（ziplist + 链表） | 消息队列、时间线 |
+| Hash | listpack / hashtable | 对象存储、用户信息 |
+| List | quicklist（当前版本通常以 listpack 作为节点） | 消息队列、时间线 |
 | Set | intset / hashtable | 去重、交集/并集/差集 |
-| ZSet | ziplist / skiplist + hashtable | 排行榜、延迟队列 |
+| ZSet | listpack / skiplist + hashtable | 排行榜、延迟队列 |
+
+> 备注：旧资料常写 `ziplist`，但在较新的 Redis 版本里，小型 Hash / ZSet 主要已经由 `listpack` 替代。
 
 ### 1.2 SDS vs C 字符串
 
@@ -120,6 +122,14 @@ end
 ### 4.2 你项目中的实现
 
 ```java
+private static final DefaultRedisScript<Long> UNLOCK_SCRIPT =
+    new DefaultRedisScript<>(
+        "if redis.call('get', KEYS[1]) == ARGV[1] then " +
+        " return redis.call('del', KEYS[1]) " +
+        "else return 0 end",
+        Long.class
+    );
+
 // RedisLockUtil - 非阻塞锁
 public String tryLock(String lockKey, long expireTime) {
     String token = UUID.randomUUID().toString();
@@ -139,12 +149,13 @@ public String lock(String lockKey, long expireTime, long timeout) {
     return null;
 }
 
-// 释放锁（验证 token）
+// 释放锁（Lua 脚本原子校验并删除，不要先 get 再 delete）
 public void unlock(String lockKey, String token) {
-    String currentToken = redisTemplate.opsForValue().get(lockKey);
-    if (token.equals(currentToken)) {
-        redisTemplate.delete(lockKey);
-    }
+    redisTemplate.execute(
+        UNLOCK_SCRIPT,
+        Collections.singletonList(lockKey),
+        token
+    );
 }
 ```
 
@@ -237,7 +248,7 @@ end
 1. 纯内存操作
 2. 单线程避免上下文切换和锁竞争（6.0 后 IO 多线程，命令执行仍单线程）
 3. IO 多路复用（epoll）
-4. 高效数据结构（SDS、ziplist、skiplist）
+4. 高效数据结构（SDS、listpack、skiplist）
 
 ### 7.2 Redis 过期策略
 

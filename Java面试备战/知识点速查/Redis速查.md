@@ -5,13 +5,15 @@
 | 类型 | 底层实现 | 应用场景 |
 |------|----------|----------|
 | String | SDS | 缓存、计数器、分布式锁 |
-| List | quicklist（ziplist + linkedlist） | 消息队列、时间线 |
-| Hash | hashtable / ziplist | 对象存储 |
+| List | quicklist（节点通常为 listpack） | 消息队列、时间线 |
+| Hash | listpack / hashtable | 对象存储 |
 | Set | hashtable / intset | 标签、交集并集 |
-| ZSet | skiplist + hashtable | 排行榜、延迟队列 |
+| ZSet | listpack / skiplist + hashtable | 排行榜、延迟队列 |
 | Bitmap | String | 签到、布隆过滤器 |
 | HyperLogLog | 概率算法 | UV 统计 |
 | Stream | Radix Tree | 消息队列（类 Kafka） |
+
+> 注：旧版本资料常写 `ziplist`，新版本 Redis 更常见的是 `listpack`。
 
 ## 持久化
 
@@ -41,7 +43,7 @@ AOF 重写时前半段用 RDB 格式，后半段用 AOF 增量。
 
 ### 缓存击穿（热点 key 过期）
 
-- 互斥锁（setnx）重建缓存
+- 互斥锁（`SET NX PX`）重建缓存
 - 逻辑过期（不设 TTL，异步更新）
 
 ### 缓存雪崩（大量 key 同时过期）
@@ -52,11 +54,11 @@ AOF 重写时前半段用 RDB 格式，后半段用 AOF 增量。
 
 ## 分布式锁
 
-```java
+```text
 // 加锁
 SET lock_key unique_value NX PX 30000
 
-// 释放（Lua 脚本保证原子性）
+// 释放（Lua 脚本保证原子性，不要先 GET 再 DEL）
 if redis.call("get", KEYS[1]) == ARGV[1] then
     return redis.call("del", KEYS[1])
 end

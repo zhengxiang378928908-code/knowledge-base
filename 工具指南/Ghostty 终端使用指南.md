@@ -112,7 +112,7 @@ cursor-style-blink = false
 
 ```
 background-opacity = 0.9
-background-blur-radius = 20
+background-blur = 20
 ```
 
 ### Quick Terminal（全局唤出）

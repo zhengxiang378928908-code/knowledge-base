@@ -61,9 +61,12 @@ producer.send(message, (mqs, msg, arg) -> {
 ### 2.3 延迟消息
 
 ```java
+// RocketMQ 4.x / 常见旧写法：使用固定延迟级别
 message.setDelayTimeLevel(3);  // level 3 = 10s
 // 延迟级别：1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
 ```
+
+> 备注：RocketMQ 5.x 还支持基于毫秒时间戳的定时 / 延迟消息，不再局限于固定的 18 个 delay level。
 
 ### 2.4 事务消息
 
@@ -87,7 +90,7 @@ message.setDelayTimeLevel(3);  // level 3 = 10s
 |------|---------|---------|
 | Producer → Broker | 网络异常 | 同步发送 + 重试（默认 3 次） |
 | Broker 存储 | 宕机 | 同步刷盘 + 主从同步 |
-| Broker → Consumer | 消费失败 | 手动 ACK，消费成功才返回 SUCCESS |
+| Broker → Consumer | 消费失败 | 监听器返回成功状态或不抛异常；失败时返回失败状态 / 抛异常触发重试 |
 
 ### 3.2 你项目中的做法
 
@@ -133,7 +136,7 @@ public class FaultTripRecordConsumer implements RocketMQListener<MessageExt> {
 
 ### 4.1 为什么会重复
 
-- Consumer 处理成功但 ACK 失败（网络抖动）
+- Consumer 处理成功，但消费结果回传失败 / 超时
 - Consumer 重平衡导致 offset 回退
 - Producer 重试导致消息重复发送
 

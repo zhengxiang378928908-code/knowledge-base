@@ -172,7 +172,7 @@ WHERE create_time >= '2024-01-01' AND create_time < '2024-01-02'
 | 特性 | 说明 | 实现机制 |
 |------|------|---------|
 | A 原子性 | 事务要么全成功，要么全回滚 | undo log |
-| C 一致性 | 事务前后数据状态一致 | 由 AID 共同保证 |
+| C 一致性 | 事务前后数据状态一致 | 由其他三个特性和业务约束共同保证 |
 | I 隔离性 | 并发事务互不干扰 | MVCC + 锁 |
 | D 持久性 | 事务提交后数据永久保存 | redo log |
 
@@ -182,7 +182,7 @@ WHERE create_time >= '2024-01-01' AND create_time < '2024-01-02'
 |---------|------|-----------|------|
 | READ UNCOMMITTED | ✓ | ✓ | ✓ |
 | READ COMMITTED | ✗ | ✓ | ✓ |
-| **REPEATABLE READ（MySQL默认）** | ✗ | ✗ | ✓（MVCC 部分解决） |
+| **REPEATABLE READ（MySQL默认）** | ✗ | ✗ | 快照读基本无幻读；当前读依赖 Next-Key Lock |
 | SERIALIZABLE | ✗ | ✗ | ✗ |
 
 ### 4.3 MVCC（多版本并发控制）
@@ -197,6 +197,9 @@ WHERE create_time >= '2024-01-01' AND create_time < '2024-01-02'
 
 - **RC**：每次 SELECT 创建新的 Read View
 - **RR**：事务第一次 SELECT 时创建 Read View，之后复用
+- 讨论幻读时要区分：
+  - **快照读**：RR 下通常不会看到幻读
+  - **当前读**（`FOR UPDATE` / `FOR SHARE`）：依赖 Next-Key Lock 防止幻读
 
 ### 4.4 锁机制
 
@@ -205,7 +208,7 @@ WHERE create_time >= '2024-01-01' AND create_time < '2024-01-02'
 - 行锁：锁单行，开销大，并发高（InnoDB 支持）
 
 **按类型：**
-- 共享锁（S 锁）：`SELECT ... LOCK IN SHARE MODE`，可以并发读
+- 共享锁（S 锁）：`SELECT ... FOR SHARE`，可以并发读（`LOCK IN SHARE MODE` 属于旧写法）
 - 排他锁（X 锁）：`SELECT ... FOR UPDATE`，独占
 - 意向锁：表级锁，表示事务想要加行锁（快速判断表上是否有行锁）
 
@@ -250,7 +253,7 @@ WHERE create_time >= '2024-01-01' AND create_time < '2024-01-02'
 | 特性 | PostgreSQL | MySQL |
 |------|-----------|-------|
 | 标准兼容性 | 更好 | 较好 |
-| JSON 支持 | 原生 JSONB（可建索引） | JSON（不能建索引） |
+| JSON 支持 | 原生 JSONB（可建索引） | 原生 JSON（不能直接索引，但可借助生成列 / 函数索引） |
 | 扩展性 | 支持自定义类型和扩展（如 pgvector） | 有限 |
 | 全文检索 | 内置 | 需要 Elasticsearch |
 | MVCC 实现 | 多版本直接在表中 | undo log |
@@ -274,7 +277,7 @@ CREATE TABLE kb4_corpus (
 CREATE INDEX idx_embedding ON kb4_corpus
 USING ivfflat (embedding_vec vector_cosine_ops);
 
--- 向量相似度搜索（L2 距离）
+-- 向量相似度搜索（这里的 <=> 是 cosine distance）
 SELECT *, embedding_vec <=> CAST(:query AS vector) AS distance
 FROM kb4_corpus
 ORDER BY embedding_vec <=> CAST(:query AS vector)

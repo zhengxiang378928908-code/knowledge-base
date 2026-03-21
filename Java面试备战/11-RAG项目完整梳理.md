@@ -284,7 +284,7 @@ ORDER BY embedding_vec <=> CAST(:embedding AS vector)
 LIMIT :top_k;
 ```
 
-- `<=>` 是 pgvector 的 L2 距离运算符
+- `<=>` 是 pgvector 的 cosine distance 运算符
 - **先过滤后排序**：利用 SQL WHERE 条件精确缩小范围，再做向量排序
 - 索引：`USING ivfflat (embedding_vec vector_cosine_ops)`
 

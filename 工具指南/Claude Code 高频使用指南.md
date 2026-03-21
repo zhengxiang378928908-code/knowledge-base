@@ -52,8 +52,8 @@ claude --resume abc123 --fork-session
 /context        查看当前 token/context 使用情况
 /config         配置设置项
 /init           分析项目，生成 CLAUDE.md
+/resume         恢复历史会话（`/continue` 是别名）
 /terminal-setup 为当前终端安装快捷键绑定
-/teleport       将 terminal session 转移到 Web 继续
 /desktop        将 session 转移到 Desktop App（查看可视化 diff）
 ```
 
@@ -65,7 +65,7 @@ claude --model sonnet   # 日常任务，默认
 claude --model haiku    # 快速简单任务，省费用
 
 # 指定完整模型名
-claude --model claude-sonnet-4-5-20250929
+claude --model claude-sonnet-4-6
 ```
 
 ## 六、权限控制
@@ -133,8 +133,9 @@ claude -p --system-prompt-file ./prompts/security-review.txt "审查这段代码
 ## 十、跨环境无缝切换
 
 ```
-/teleport   → 把 terminal session 转移到 Web
-/desktop    → 转移到 Desktop App（可视化查看 diff）
+/desktop                  → 将当前 session 转到 Desktop App
+claude --remote "任务描述" → 在 claude.ai 新建 Web 会话
+claude --teleport         → 把 Web 会话接回本地终端
 ```
 
 ## 十一、实用 CLI 组合技
@@ -145,13 +146,14 @@ tail -f app.log | claude -p "发现异常立刻告诉我"
 
 # PR diff 安全审查
 gh pr diff 42 | claude -p \
+  "审查这份 PR diff，输出结构化安全结论" \
   --append-system-prompt "你是安全工程师，重点检查漏洞" \
   --output-format json
 
 # 多轮连续分析
 claude -p "审查这个项目的性能问题"
-claude -p "重点看数据库查询" --continue
-claude -p "汇总所有问题" --continue
+claude -c -p "重点看数据库查询"
+claude -c -p "汇总所有问题"
 
 # 限制最大执行轮次
 claude -p --max-turns 5 "重构这个模块"

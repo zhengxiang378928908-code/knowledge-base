@@ -120,8 +120,11 @@
 -XX:+UseG1GC            # 使用 G1
 -XX:MaxGCPauseMillis=200 # 期望停顿时间
 
-# 日志
+# GC 日志（JDK 8）
 -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:/path/gc.log
+
+# GC 日志（JDK 9+，统一日志）
+-Xlog:gc*:file=/path/gc.log:time,uptime,level,tags
 
 # OOM dump
 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/

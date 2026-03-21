@@ -61,7 +61,9 @@
 ### 自动配置原理
 
 1. `@SpringBootApplication` 包含 `@EnableAutoConfiguration`
-2. 通过 `spring.factories` / `AutoConfiguration.imports` 加载配置类
+2. 按版本加载配置类：
+   - Boot 2.x：`spring.factories`
+   - Boot 3.x+：`AutoConfiguration.imports`
 3. `@Conditional` 系列注解决定是否生效
 4. 开发者可通过 `application.yml` 覆盖默认配置
 
@@ -86,7 +88,7 @@
 
 ### 事务失效场景
 
-1. 方法不是 public
+1. 标在非 `public` 方法上的事务在标准代理模式下通常不要依赖其生效
 2. 自调用（同类方法调用，未经过代理）
 3. 异常被 catch 吞掉
 4. 数据库不支持事务（MyISAM）
