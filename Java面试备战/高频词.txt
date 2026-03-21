@@ -1,0 +1,437 @@
+✅ 一、系统 & 架构类（Senior 核心词）
+
+这些词一出口，面试官默认你是干过系统的。
+
+distributed backend systems
+
+message-driven architecture
+
+event-driven processing
+
+asynchronous processing
+
+downstream services
+
+decouple / decoupling
+
+operational workflows
+
+system stability
+
+system reliability
+
+resilience
+
+👉 常用搭配：
+
+improve system stability
+
+protect downstream services
+
+✅ 二、消息队列 & 流量类（你简历最强区）
+
+这些词是你最值钱的资产。
+
+burst traffic
+
+traffic spikes
+
+message backlog
+
+consumer throughput
+
+message lag
+
+dead-letter queue (DLQ)
+
+retry mechanism
+
+throttling
+
+backpressure
+
+consumer group isolation
+
+👉 高级但安全的说法：
+
+buffer traffic spikes
+
+gradually drain the backlog
+
+✅ 三、数据一致性 & 正确性（Senior 分水岭）
+
+这些词不炫，但非常高级。
+
+data consistency
+
+idempotent consumers / idempotency
+
+deduplication key
+
+explicit state transitions
+
+recovery workflows
+
+partial failures
+
+reprocessing
+
+👉 面试官听到会很安心的一组词。
+
+✅ 四、生产环境 & 运维（美国非常看重）
+
+这些词是**“我真的在 on-call”信号**。
+
+production environment
+
+production incident
+
+primary responder
+
+incident detection
+
+issue diagnosis
+
+mitigation
+
+gradual recovery
+
+operational visibility / observability
+
+👉 常见高级句式：
+
+act as a primary responder
+
+drive the system back to a stable state
+
+✅ 五、监控 & 可观测性（非常加分）
+
+monitoring and alerting
+
+service-level metrics
+
+alerting rules
+
+abnormal trends
+
+incident detection time
+
+👉 你那句 25 minutes → 2 minutes 就靠这组词撑住。
+
+✅ 六、数据库 & 性能（稳健、不危险）
+
+这些词永远安全。
+
+database contention
+
+deadlock
+
+long-running transactions
+
+transaction scope
+
+slow query
+
+query optimization
+
+proper indexes
+
+👉 关键搭配：
+
+reduce transaction scope
+
+optimize database access patterns
+
+✅ 七、调度 & 人工控制（你简历的加分项）
+
+distributed scheduling system
+
+manual triggering
+
+execution status tracking
+
+safe re-runs
+
+failure handling
+
+👉 这是“工程成熟度”词汇。
+
+🚫 八、你刻意没用、而且现在不该用的词
+
+你现在做得非常对，继续避开：
+
+exactly-once semantics
+
+two-phase commit
+
+saga
+
+consensus algorithm
+
+Raft / Paxos
+
+JVM tuning parameters
+
+👉 不是你不会，是没必要。
+
+🧠 使用建议（非常重要）
+✅ 正确用法
+
+用这些词 自然地散落在句子里
+
+每个回答 2–3 个就够
+
+❌ 错误用法
+
+一句话塞 6 个
+
+把词当 checklist 念
+
+最后一条实话（你这个阶段最重要的）
+
+面试不是“谁词汇高级”，
+而是 “谁用高级词还能说人话”。
+
+你现在这套词：
+
+真实
+
+可复现
+
+不容易翻车
+
+如果你愿意，下一步我可以帮你做两件非常实用的事之一：
+
+1️⃣ 把这些词压成一页「口语可用版词汇卡」
+2️⃣ 模拟面试时，专门帮你纠正“该用哪个词、不该用哪个词”
+
+你选一个，我马上给你做。
+
+提供一下 中文和 音标
+
+好，我给你一份 「高级词汇白名单 · 中英 + IPA 音标」。
+只包含你简历 + 已锁定 Q&A 里真正会用到的词，按类别整理，方便你跟读 + 记忆。
+
+读法以美式 IPA为主；你不用追求完美，重音对了就够。
+
+🧱 一、系统 & 架构（Senior 基础盘）
+
+distributed backend systems
+分布式后端系统
+/dɪˈstrɪbjuːtɪd ˈbækˌɛnd ˈsɪstəmz/
+
+message-driven architecture
+消息驱动架构
+/ˈmɛsɪdʒ ˈdrɪvən ˈɑːrkɪˌtɛktʃər/
+
+event-driven processing
+事件驱动处理
+/ɪˈvɛnt ˈdrɪvən ˈprɑːsɛsɪŋ/
+
+asynchronous processing
+异步处理
+/eɪˈsɪŋkrənəs ˈprɑːsɛsɪŋ/
+
+decouple / decoupling
+解耦
+/diːˈkʌpəl/ /diːˈkʌplɪŋ/
+
+downstream services
+下游服务
+/ˈdaʊnstriːm ˈsɜːrvɪsɪz/
+
+operational workflows
+业务 / 运行流程
+/ˌɑːpəˈreɪʃənəl ˈwɜːrkfloʊz/
+
+system stability
+系统稳定性
+/ˈsɪstəm stəˈbɪləti/
+
+system reliability
+系统可靠性
+/rɪˌlaɪəˈbɪləti/
+
+resilience
+系统韧性 / 抗故障能力
+/rɪˈzɪliəns/
+
+🚦 二、消息队列 & 流量（你最强项）
+
+burst traffic
+突发流量
+/bɜːrst ˈtræfɪk/
+
+traffic spikes
+流量尖峰
+/ˈtræfɪk spaɪks/
+
+message backlog
+消息积压
+/ˈmɛsɪdʒ ˈbæklɔːɡ/
+
+message lag
+消息延迟
+/mɛsɪdʒ læɡ/
+
+consumer throughput
+消费吞吐量
+/kənˈsuːmər ˈθruːpʊt/
+
+dead-letter queue (DLQ)
+死信队列
+/dɛd ˈlɛtər kjuː/
+
+retry mechanism
+重试机制
+/rɪˈtraɪ ˈmɛkəˌnɪzəm/
+
+throttling
+限流
+/ˈθrɑːtəlɪŋ/
+
+backpressure
+背压
+/ˈbækˌprɛʃər/
+
+consumer group isolation
+消费组隔离
+/kənˈsuːmər ɡruːp ˌaɪsəˈleɪʃən/
+
+🧠 三、数据一致性 & 正确性（Senior 分水岭）
+
+data consistency
+数据一致性
+/ˈdeɪtə kənˈsɪstənsi/
+
+idempotency / idempotent
+幂等性 / 幂等的
+/ˌaɪdɛmˈpoʊtənsɪ/ /ˌaɪdɛmˈpoʊtənt/
+
+idempotent consumer
+幂等消费者
+/ˌaɪdɛmˈpoʊtənt kənˈsuːmər/
+
+deduplication key
+去重键
+/diːˌduːplɪˈkeɪʃən kiː/
+
+explicit state transitions
+显式状态流转
+/ɪkˈsplɪsɪt steɪt trænˈzɪʃənz/
+
+recovery workflows
+恢复流程
+/rɪˈkʌvəri ˈwɜːrkfloʊz/
+
+partial failures
+局部失败
+/ˈpɑːrʃəl ˈfeɪljərz/
+
+reprocessing
+重新处理
+/ˌriːˈprɑːsɛsɪŋ/
+
+🚨 四、生产事故 & 运维（非常关键）
+
+production environment
+生产环境
+/prəˈdʌkʃən ɪnˈvaɪrənmənt/
+
+production incident
+生产事故
+/prəˈdʌkʃən ˈɪnsɪdənt/
+
+primary responder
+第一响应人
+/ˈpraɪmɛri rɪˈspɑːndər/
+
+incident detection
+事故发现
+/ˈɪnsɪdənt dɪˈtɛkʃən/
+
+issue diagnosis
+问题定位
+/ˈɪʃuː ˌdaɪəɡˈnoʊsɪs/
+
+mitigation
+缓解 / 止损
+/ˌmɪtɪˈɡeɪʃən/
+
+gradual recovery
+逐步恢复
+/ˈɡrædʒuəl rɪˈkʌvəri/
+
+observability
+可观测性
+/əbˌzɜːrvəˈbɪləti/
+
+📊 五、监控 & 可观测性
+
+monitoring and alerting
+监控与告警
+/ˈmɑːnɪtərɪŋ ænd əˈlɜːrtɪŋ/
+
+service-level metrics
+服务级指标
+/ˈsɜːrvɪs ˈlɛvəl ˈmɛtrɪks/
+
+alerting rules
+告警规则
+/əˈlɜːrtɪŋ ruːlz/
+
+abnormal trends
+异常趋势
+/æbˈnɔːrməl trɛndz/
+
+🗄️ 六、数据库 & 性能（稳妥安全）
+
+database contention
+数据库争用
+/ˈdeɪtəˌbeɪs kənˈtɛnʃən/
+
+deadlock
+死锁
+/ˈdɛdˌlɑːk/
+
+long-running transactions
+长事务
+/lɔːŋ ˈrʌnɪŋ trænˈzækʃənz/
+
+transaction scope
+事务范围
+/trænˈzækʃən skoʊp/
+
+slow query
+慢查询
+/sloʊ ˈkwɪri/
+
+query optimization
+查询优化
+/ˈkwɪri ˌɑːptɪmaɪˈzeɪʃən/
+
+proper indexes
+合理索引
+/ˈprɑːpər ˈɪndɛksɪz/
+
+⏱️ 七、调度 & 人工控制（加分项）
+
+distributed scheduling system
+分布式调度系统
+/dɪˈstrɪbjuːtɪd ˈʃɛdjuːlɪŋ ˈsɪstəm/
+
+manual triggering
+人工触发
+/ˈmænjuəl ˈtrɪɡərɪŋ/
+
+execution status tracking
+执行状态追踪
+/ˌɛksɪˈkjuːʃən ˈsteɪtəs ˈtrækɪŋ/
+
+safe re-runs
+安全重跑
+/seɪf ˈriːrʌnz/
+
+failure handling
+故障处理
+/ˈfeɪljər ˈhændlɪŋ/

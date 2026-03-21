@@ -1,0 +1,257 @@
+Q0. Can you briefly introduce yourself?
+
+A:
+I’m a backend software engineer with about eight years of experience.
+
+I mainly work with Java and distributed backend systems.
+
+In recent years, I’ve worked on backend systems for power grid and energy platforms, focusing on system stability and message-driven architectures.
+
+Before that, I worked on large-scale banking systems, where I dealt with high-reliability requirements and production incidents.
+
+Q1. Can you describe the system you worked on?
+
+A:
+I worked on backend systems for power grid and energy platforms.
+
+The system consisted of distributed backend services used to ingest device data and support operational workflows.
+
+It processed a large amount of operational data, so system stability and reliability were critical.
+
+Q2. What was your main responsibility?
+
+A:
+My main responsibility was building and maintaining backend services for device data ingestion and downstream processing.
+
+I also set up and maintained monitoring and alerting for key services, and handled production incidents.
+
+Q3. Why did you use a message-driven architecture?
+
+A:
+We used a message-driven architecture to decouple upstream device traffic from downstream business services.
+
+This helped protect core systems under burst traffic and improved overall system stability.
+
+Q4. What kind of message volume did you handle?
+
+A:
+The system handled around 250 thousand events per day on average.
+
+Traffic was not evenly distributed and could spike during certain periods.
+
+Q5. How did you handle burst traffic?
+
+A:
+We handled burst traffic mainly through asynchronous processing and backpressure mechanisms.
+
+Message queues helped buffer traffic spikes, and we also used throttling and consumer group isolation to prevent downstream overload.
+
+Q6. How did you ensure message processing reliability?
+
+A:
+We implemented retry and dead-letter mechanisms to handle transient failures.
+
+For unrecoverable cases, messages were sent to a dead-letter queue for manual inspection and recovery.
+
+Q7. How did you handle duplicate messages?
+
+A:
+We implemented idempotent consumers.
+
+Each message had a unique deduplication key, and we checked processing state before applying any business changes.
+
+Q8. How did you ensure data consistency?
+
+A:
+We used a combination of idempotency, explicit state transitions, and recovery workflows.
+
+This ensured correctness under retries, partial failures, and message reprocessing.
+
+Q9. Can you describe a production incident you handled?
+
+A:
+One typical incident was message backlog caused by downstream database contention.
+
+Message consumption slowed down, and messages started to accumulate in the queue.
+
+I identified the bottleneck through monitoring and logs, then applied traffic throttling and optimized database access patterns to gradually recover the system.
+
+Q10. How did you detect incidents?
+
+A:
+We defined service-level metrics and alerting rules for key components.
+
+This reduced incident detection time from around 25 minutes to about 2 minutes.
+
+Q11. What kind of monitoring did you set up?
+
+A:
+We monitored message lag, consumer throughput, error rates, database performance, and service latency.
+
+Alerts were triggered based on thresholds and abnormal trends.
+
+Q12. Were you on-call?
+
+A:
+Yes. I acted as a primary responder for production incidents.
+
+I was responsible for issue diagnosis, mitigation, and coordinating fixes.
+
+Q13. Can you explain the distributed scheduling system you mentioned?
+
+A:
+We built a distributed scheduling and execution system to manually trigger critical jobs.
+
+It tracked execution status, handled failures, and supported safe re-runs.
+
+Q14. Why did you need manual triggering?
+
+A:
+Some critical jobs required human control to ensure safety and correctness, especially during recovery or exceptional situations.
+
+Q15. How is banking system work different?
+
+A:
+Banking systems have stricter requirements on data consistency and reliability.
+
+Even small errors can have serious consequences.
+
+Q16. What kind of incidents did you see in banking systems?
+
+A:
+Common issues included transaction rollback problems, database deadlocks, and database overload caused by traffic spikes or message accumulation.
+
+Q17. RocketMQ or Kafka?
+
+A:
+I mainly used RocketMQ, but the overall messaging concepts are similar to Kafka.
+
+Q18. PostgreSQL or MySQL?
+
+A:
+I’ve worked with both PostgreSQL and MySQL, depending on system requirements.
+
+Q19. Linux / Docker?
+
+A:
+Yes, I’m familiar with Linux environments and container-based deployment.
+
+Q20. How do you ensure idempotency in message consumption?
+
+A（锁定版）
+
+We ensured idempotency mainly at the consumer side.
+
+Each message carried a unique business key, and before processing we checked whether the message had already been handled.
+
+If it was already processed, we skipped the business logic to avoid duplicate effects.
+
+🔒 关键词只允许这些：
+consumer side / unique key / already processed / skip
+
+Q21. How do you handle duplicate message consumption?
+
+A（锁定版）
+
+Duplicate consumption was handled through idempotent design.
+
+Even if a message was delivered more than once, the business result would remain the same.
+
+⚠️ 不说：
+
+exactly-once
+
+分布式事务
+
+MQ 内部实现
+
+Q22. What causes message backlog, and how do you handle it?
+
+A（锁定版）
+
+Message backlog was usually caused by downstream bottlenecks, such as database contention or slow external dependencies.
+
+We identified the bottleneck through monitoring, then applied throttling, batching, or temporary scaling to gradually drain the backlog.
+
+🔒 三板斧顺序不能乱：
+定位 → 控流 → 恢复
+
+Q23. How do you detect message backlog?
+
+A（锁定版）
+
+We monitored message lag and consumer throughput.
+
+Alerts were triggered when backlog size or processing delay exceeded predefined thresholds.
+
+Q24. How do you handle message ordering?
+
+⚠️ 这个问题你一定要答得“克制”
+
+A（锁定版）
+
+Ordering was only required for specific business scenarios.
+
+For those cases, we ensured messages with the same business key were processed sequentially.
+
+For most scenarios, strict global ordering was not necessary.
+
+🚨 这是重点：
+👉 你主动“降需求”，面试官会觉得你成熟
+
+Q25. Does Kafka / RocketMQ guarantee exactly-once?
+
+A（锁定版）
+
+In practice, we didn’t rely on the messaging system to guarantee exactly-once semantics.
+
+We handled correctness at the application level through idempotent design.
+
+🔒 Q26. How do you handle database deadlocks in production?
+
+A（LOCKED VERSION）
+
+When a deadlock occurs in production, we first identify the involved transactions and SQL through database logs and monitoring information.
+
+In most cases, the root cause is either inconsistent update order across services or long-running transactions holding locks for too long.
+
+To fix this, we typically enforce a consistent resource access order, reduce transaction scope, optimize queries with proper indexes, and add retry logic at the application level to safely handle occasional deadlocks.
+
+Q27. Can you describe another production incident you handled?
+
+A（LOCKED VERSION）
+
+Another incident involved increased API latency in production.
+
+We noticed response times gradually increasing, while error rates remained low.
+
+After investigation, the root cause was a slow database query caused by missing indexes and inefficient query patterns under higher load.
+
+We optimized the query, added proper indexes, and reduced unnecessary data access.
+
+After the fix, latency returned to normal and the system stabilized.
+
+What do you mean by consumer group isolation?
+
+Why is isolation important?
+
+To prevent one slow consumer from affecting other business workflows.
+
+
+最后询问
+I have a couple of questions.
+
+Can you briefly describe the team structure I’d be working with?
+
+How does on-call work for this team?
+
+And at a high level, how large is the system today?
+
+救命句
+
+Sorry, could you repeat that more slowly?
+
+Just to make sure I understand…
+Sorry, could you say that a bit more slowly?
+Based on my experience…
+
