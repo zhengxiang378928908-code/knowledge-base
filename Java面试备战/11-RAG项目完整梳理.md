@@ -9,7 +9,7 @@
 
 > 这个项目是电网预警规则的意图解析引擎。核心目标是把业务人员用自然语言描述的预警规则（比如"断路器SF6化学试验超期8年生成工单"），转换成结构化的业务 DSL，后续交给执行引擎去做设备预警和工单生成。
 >
-> 我负责整个后端的核心链路设计和开发，包括规则语料清洗、Slot 抽取、混合检索、DSL 生成和多层校验。技术栈是 Python + FastAPI + PostgreSQL(pgvector)，部署用 Docker 4 容器。
+> 我负责整个后端的核心链路设计和开发，包括规则语料清洗、Slot 抽取、混合检索、DSL 生成和多层校验。技术栈是 Python + FastAPI + PostgreSQL(pgvector)。线上部署目标是 `192.168.0.219`，当前在线容器是 `rag-backend`、`rag-frontend`、`rag-embedding`、`rag-postgres`。
 
 ---
 
@@ -59,6 +59,15 @@
 | `/api/v1/kb/summary` | GET | 知识库统计（实体/场景/范文数量） |
 | `/api/v1/intent` | POST | 核心：自然语言 → DSL（8步 Pipeline） |
 | `/api/v1/confirm` | POST | 用户确认/拒绝 DSL |
+
+### 2.1 仓库里能直接拿来当“项目证据”的点
+
+- 编排入口就在 `backend/src/pipeline/orchestrator.py` 的 `PhaseAOrchestrator`，构造函数里直接挂了 `TextNormalizer`、`AliasScanner`、`RegexExtractor`、`EntityDisambiguator`、`LLMSlotAssembler`、`SlotValidator`、`VectorSearch`、`HybridRanker`、`DSLGenerator`、`DSLValidator`、`BackTranslator`、`ConfirmationHandler`
+- 会话模型 `backend/src/models/session.py` 明确保留了 `pending_clarification`、`negative_examples`、`negative_constraints`、`deprioritized_corpus_ids`、`retry_count`、`max_retries`
+- 部署文档写明当前目标服务器是 `192.168.0.219`，在线容器是 `rag-backend`、`rag-frontend`、`rag-embedding`、`rag-postgres`
+- 回归命令不是手工试几个 case，而是 `make slot-regression-bundle`、`make slot-dsl-smoke`、`make slot-phase1-report`
+- 当前回归口径是 `42` 条 existing cases 加 `26` 条 markdown cases 汇成 `68` 条基线
+- `backend/tests/` 当前有 `49` 个 pytest 文件，覆盖 unit / integration / regression / smoke
 
 ---
 
@@ -228,8 +237,9 @@ session_context = {
     },
     "deprioritized_corpus_ids": ["r1", "r2"],  # 被拒绝的语料 ID
     "negative_examples": [{"dsl":{...}, "user_feedback":"不对"}],
+    "negative_constraints": [{"field":"action", "op":"neq", "value":"generate_work_order"}],
     "retry_count": 1,
-    "max_retries": 3,
+    "max_retries": 2,
     "last_parse_record_id": "uuid",
     "last_feedback_record_id": "uuid"
 }
@@ -515,9 +525,10 @@ tests/
 ```
 
 **回归验证集：**
-- 299 条槽位覆盖
-- 68 条 slot acceptance cases（核心 entity + scenario + metrics 必须全部匹配）
-- 46 个测试文件
+- 42 条 existing cases
+- 26 条 markdown cases
+- 合并后形成 68 条槽位基线（核心 entity + scenario + metrics 必须全部匹配）
+- 49 个 pytest 文件
 
 ---
 
@@ -544,7 +555,7 @@ tests/
 > - **部分通过**：核心字段匹配，scope_hints/conditions 缺失
 > - **不通过**：核心字段有误
 >
-> 每次代码变更都跑全量回归，保证不退步。
+> 更准确地说，当前口径是 42 条 existing cases 加 26 条 markdown cases 汇成 68 条基线。每次代码变更都跑全量回归，保证不退步。
 
 ### Q4：DSL 两层设计的意义？
 
@@ -588,12 +599,12 @@ tests/
 ### Q8：私有化部署怎么做的？
 
 > Docker 4 容器：
-> 1. **API 服务**：FastAPI + uvicorn
-> 2. **PostgreSQL**：带 pgvector 扩展
-> 3. **前端**：Vue 3 静态资源
-> 4. **Nginx**：反向代理 + 前端服务
+> 1. **rag-backend**：FastAPI + uvicorn
+> 2. **rag-postgres**：PostgreSQL + pgvector
+> 3. **rag-embedding**：Embedding 服务
+> 4. **rag-frontend**：Vue 3 静态资源，容器内 Nginx 代理 `/api/*` 和 `/health`
 >
-> docker-compose 编排，环境变量配置 LLM 和 Embedding 的内网地址。
+> 部署目标服务器是 `192.168.0.219`，环境变量配置 LLM 和 Embedding 地址，前端容器默认走同源代理。
 
 ### Q9：如果让你优化，你会改什么？
 
