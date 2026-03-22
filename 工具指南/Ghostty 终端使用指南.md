@@ -6,8 +6,7 @@
 
 ## 什么是 Ghostty
 
-Ghostty 是一款用 Zig 编写的高性能 GPU 加速终端模拟器，注重速度、功能和原生体验。macOS 上提供 `.app`，Linux 支持多种包管理器。
-
+Ghostty 是一款用 Zig 编写的高性能 GPU 加速终端模拟器，注重速度、功能和原生体验。macOS 上提供 `.app`，Linux 支持多种包管理器
 ---
 
 ## 安装

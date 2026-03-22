@@ -9,7 +9,7 @@
 
 > 这个项目是电网预警规则的意图解析引擎。核心目标是把业务人员用自然语言描述的预警规则（比如"断路器SF6化学试验超期8年生成工单"），转换成结构化的业务 DSL，后续交给执行引擎去做设备预警和工单生成。
 >
-> 我负责整个后端的核心链路设计和开发，包括规则语料清洗、Slot 抽取、混合检索、DSL 生成和多层校验。技术栈是 Python + FastAPI + PostgreSQL(pgvector)。线上部署目标是 `192.168.0.219`，当前在线容器是 `rag-backend`、`rag-frontend`、`rag-embedding`、`rag-postgres`。
+> 我负责整个后端的核心链路设计和开发，包括规则语料清洗、Slot 抽取、混合检索、DSL 生成和多层校验。技术栈是 Python + FastAPI + PostgreSQL(pgvector)。它不是一个单轮调用大模型的 demo，而是已经做成独立部署、支持多轮澄清和回归验证的 AI 后端服务。
 
 ---
 
@@ -51,23 +51,19 @@
               用户拒绝 ──→ revise_requested（负例 + 语料降权 → 重新生成）
 ```
 
-**四个 API 端点：**
+**面试里这一段不用背接口清单，重点抓四件事：**
 
-| 端点 | 方法 | 作用 |
-|------|------|------|
-| `/health` | GET | 健康检查（DB + LLM + Embedding 三路探活） |
-| `/api/v1/kb/summary` | GET | 知识库统计（实体/场景/范文数量） |
-| `/api/v1/intent` | POST | 核心：自然语言 → DSL（8步 Pipeline） |
-| `/api/v1/confirm` | POST | 用户确认/拒绝 DSL |
+- 它有完整编排链路，不是一个大 prompt 包打天下
+- 它支持多轮澄清和 bad case 纠偏，不是单轮问答
+- 它有依赖探活和降级策略，具备真实服务属性
+- 它有固定回归口径，不靠人工点几个 case 验证
 
 ### 2.1 仓库里能直接拿来当“项目证据”的点
 
-- 编排入口就在 `backend/src/pipeline/orchestrator.py` 的 `PhaseAOrchestrator`，构造函数里直接挂了 `TextNormalizer`、`AliasScanner`、`RegexExtractor`、`EntityDisambiguator`、`LLMSlotAssembler`、`SlotValidator`、`VectorSearch`、`HybridRanker`、`DSLGenerator`、`DSLValidator`、`BackTranslator`、`ConfirmationHandler`
-- 会话模型 `backend/src/models/session.py` 明确保留了 `pending_clarification`、`negative_examples`、`negative_constraints`、`deprioritized_corpus_ids`、`retry_count`、`max_retries`
-- 部署文档写明当前目标服务器是 `192.168.0.219`，在线容器是 `rag-backend`、`rag-frontend`、`rag-embedding`、`rag-postgres`
-- 回归命令不是手工试几个 case，而是 `make slot-regression-bundle`、`make slot-dsl-smoke`、`make slot-phase1-report`
-- 当前回归口径是 `42` 条 existing cases 加 `26` 条 markdown cases 汇成 `68` 条基线
-- `backend/tests/` 当前有 `49` 个 pytest 文件，覆盖 unit / integration / regression / smoke
+- 编排入口是 `PhaseAOrchestrator`，说明这条链路是代码化编排，不是零散脚本堆出来的
+- 会话模型里保留了待澄清信息、负例反馈和重试状态，说明系统真的支持多轮纠偏
+- 回归命令和固定基线都在仓库里，当前口径是 `42 + 26 = 68` 条案例，不是临时手测
+- `backend/tests/` 当前有 `49` 个 pytest 文件，覆盖单测、集成、回归和 smoke，说明它是可持续迭代的工程
 
 ---
 
@@ -598,13 +594,7 @@ tests/
 
 ### Q8：私有化部署怎么做的？
 
-> Docker 4 容器：
-> 1. **rag-backend**：FastAPI + uvicorn
-> 2. **rag-postgres**：PostgreSQL + pgvector
-> 3. **rag-embedding**：Embedding 服务
-> 4. **rag-frontend**：Vue 3 静态资源，容器内 Nginx 代理 `/api/*` 和 `/health`
->
-> 部署目标服务器是 `192.168.0.219`，环境变量配置 LLM 和 Embedding 地址，前端容器默认走同源代理。
+> 我们做的是分层部署：后端服务、数据库、向量能力和前端界面是拆开的，核心依赖通过环境变量配置。这样上线时可以分别扩容和排障，不会把 AI 能力和业务入口耦在一起。
 
 ### Q9：如果让你优化，你会改什么？
 
