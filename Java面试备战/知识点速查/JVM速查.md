@@ -93,6 +93,17 @@ AppClassLoader（classpath）
 
 ## JVM 调优
 
+> 核心目标：减少 GC 次数、降低 GC 停顿时间、避免 OOM / 内存泄漏
+
+### 面试回答结构
+
+我一般从三个维度分析 JVM：
+1. 内存结构（堆/新生代/老年代）
+2. GC 行为（频率、停顿、算法）
+3. 对象特征（生命周期、创建速率）
+
+通过监控 + GC 日志定位问题，再进行参数调优。
+
 ### 常用参数
 
 ```bash
@@ -104,7 +115,35 @@ AppClassLoader（classpath）
 -XX:MaxGCPauseMillis=200
 -XX:+HeapDumpOnOutOfMemoryError
 -XX:HeapDumpPath=/tmp/dump.hprof
+-XX:+PrintGCDetails   # GC 日志（JDK8）
+-Xlog:gc*             # GC 日志（JDK9+）
 ```
+
+### 调优思路
+
+**第一步：先看 GC 日志，不盲调**
+- GC 是否频繁
+- 单次 GC 是否耗时过长
+
+**Minor GC 频繁**
+- 原因：新生代太小 / 对象创建过多
+- 优化：调大新生代（`-Xmn`）、减少短命对象创建
+
+**Full GC 频繁**
+- 原因：老年代满 / 对象晋升过快 / 内存泄漏
+- 优化：增大堆（`-Xmx`）、调整新生代比例、dump + MAT 分析泄漏
+
+**GC 停顿时间长**
+- 优化：换用 G1 / ZGC
+
+### 调优步骤（高分回答模板）
+
+1. 监控（CPU / 内存 / GC 日志）
+2. 判断问题类型（频繁 GC or 停顿过长）
+3. 调整内存结构（堆大小、新生代比例）
+4. 排查内存泄漏（jmap dump → MAT 分析引用链）
+5. 选择合适 GC 算法（G1 / ZGC）
+6. 压测验证效果
 
 ### 常用诊断工具
 
@@ -116,6 +155,40 @@ AppClassLoader（classpath）
 | jstack | 线程 dump |
 | jconsole / VisualVM | 可视化监控 |
 | Arthas | 在线诊断神器 |
+| MAT | 分析内存泄漏（引用链） |
+
+### MAT 内存泄漏排查实战
+
+**获取堆 dump**
+
+```bash
+# 手动 dump
+jmap -dump:format=b,file=/tmp/dump.hprof <pid>
+
+# OOM 时自动 dump（推荐提前配置）
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath=/tmp/dump.hprof
+```
+
+**MAT 核心功能**
+
+| 功能 | 作用 |
+|------|------|
+| Leak Suspects Report | 自动分析疑似泄漏点（打开 dump 后自动弹出） |
+| Dominator Tree | 按对象占用内存从大到小排列，快速定位大对象 |
+| Histogram | 按类统计对象数量和内存占用 |
+| Path to GC Roots | 查看引用链，找出谁持有对象导致无法回收 |
+
+**排查流程**
+
+```
+打开 dump → Leak Suspects（看自动报告）
+  → Dominator Tree（找最大对象）
+  → 右键可疑对象 → Path to GC Roots → exclude weak references
+  → 顺着引用链定位泄漏代码
+```
+
+**面试话术**：Full GC 后内存不下降，怀疑内存泄漏。用 `jmap` dump 堆内存，MAT 打开后看 Leak Suspects 报告，再通过 Dominator Tree 找到占用最大的对象，右键查看 Path to GC Roots，顺着引用链定位到泄漏的代码位置。
 
 ## 高频面试题
 
@@ -124,3 +197,6 @@ AppClassLoader（classpath）
 3. **OOM 排查思路？**
 4. **G1 和 CMS 区别？**
 5. **类加载器和双亲委派模型？什么场景会打破？**
+6. **如何判断内存泄漏？** Full GC 后内存不下降 → MAT 查看引用链
+7. **对象为什么进入老年代？** Survivor 放不下 / 年龄达到阈值（默认 15）
+8. **G1 优势？** 无碎片、可预测停顿、Region 粒度回收
