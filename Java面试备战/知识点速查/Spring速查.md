@@ -117,8 +117,22 @@ Spring 通过三级缓存解决 singleton 的循环依赖：
 ## 高频面试题
 
 1. **Spring IoC 容器的初始化过程？**
+   - 加载配置（XML / 注解扫描）→ BeanDefinition 注册 → 实例化 → 属性注入 → 初始化（Aware 回调、BeanPostProcessor、init-method）→ 就绪
+
 2. **BeanFactory 和 ApplicationContext 区别？**
+   - BeanFactory：最基础的容器，懒加载
+   - ApplicationContext：BeanFactory 的子接口，启动时预加载所有单例 Bean，支持国际化、事件、AOP 等
+
 3. **AOP 是怎么实现的？JDK 动态代理 vs CGLIB？**
-4. **@Transactional 失效的场景？**
+   - JDK 动态代理：基于接口，Proxy + InvocationHandler，目标类必须实现接口
+   - CGLIB：基于继承，生成目标类的子类，不需要接口但不能代理 final 类/方法
+   - Spring 默认：有接口用 JDK，无接口用 CGLIB；Spring Boot 2.x 起默认全用 CGLIB
+
+4. **@Transactional 失效的场景？**（非 public 方法、同类自调用绕过代理、异常被 catch 吞掉、数据库引擎不支持、传播行为设置不当）
+
 5. **Spring Boot 自动配置原理？**
+   - `@SpringBootApplication` → `@EnableAutoConfiguration` → 加载 `spring.factories`（Boot 2.x）或 `AutoConfiguration.imports`（Boot 3.x）→ `@Conditional` 按条件决定是否生效
+
 6. **循环依赖怎么解决？**
+   - 三级缓存：singletonObjects（完成品）→ earlySingletonObjects（半成品）→ singletonFactories（对象工厂，用于创建代理）
+   - 构造器注入的循环依赖无法解决，用 `@Lazy` 打破

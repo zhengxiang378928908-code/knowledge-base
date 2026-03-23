@@ -112,7 +112,20 @@ String name = (String) m.invoke(obj);
 ## 高频面试题
 
 1. **final、finally、finalize 的区别？**
+   - `final`：修饰类不可继承、方法不可重写、变量不可修改
+   - `finally`：try-catch 后必执行的代码块（释放资源）
+   - `finalize`：GC 回收前调用（已废弃，不要用）
+
 2. **String 为什么不可变？不可变有什么好处？**
-3. **Java 是值传递还是引用传递？**（值传递，对象传的是引用的副本）
+   - `final char[]`（Java 9+ 改为 `byte[]`）+ 类声明为 final
+   - 好处：线程安全、可缓存 hashCode、字符串常量池复用、安全（防止被篡改）
+
+3. **Java 是值传递还是引用传递？**
+   - 值传递。基本类型传值的副本，引用类型传引用地址的副本
+   - 方法内修改引用指向不影响原变量，但修改引用指向的对象内容会影响
+
 4. **深拷贝 vs 浅拷贝？**
-5. **Object 类有哪些方法？**（equals, hashCode, toString, clone, wait, notify, finalize, getClass）
+   - 浅拷贝：复制对象本身，引用类型字段仍指向同一个对象（`clone()` 默认）
+   - 深拷贝：递归复制所有引用对象（序列化 / 手动递归 clone）
+
+5. **Object 类有哪些方法？**（equals, hashCode, toString, clone, wait, notify, notifyAll, finalize, getClass）
