@@ -147,15 +147,15 @@ AppClassLoader（classpath）
 
 ### 常用诊断工具
 
-| 工具 | 用途 |
-|------|------|
-| jps | 查看 Java 进程 |
-| jstat | GC 统计 |
-| jmap | 堆 dump |
-| jstack | 线程 dump |
-| jconsole / VisualVM | 可视化监控 |
-| Arthas | 在线诊断神器 |
-| MAT | 分析内存泄漏（引用链） |
+| 工具                  | 用途          |
+| ------------------- | ----------- |
+| jps                 | 查看 Java 进程  |
+| jstat               | GC 统计       |
+| jmap                | 堆 dump      |
+| jstack              | 线程 dump     |
+| jconsole / VisualVM | 可视化监控       |
+| Arthas              | 在线诊断神器      |
+| MAT                 | 分析内存泄漏（引用链） |
 
 ### MAT 内存泄漏排查实战
 

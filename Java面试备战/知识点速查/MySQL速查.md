@@ -191,3 +191,4 @@ SHOW VARIABLES LIKE 'slow_query_log_file';  -- 查看日志位置
 5. **慢查询怎么优化？**（开 slow log → EXPLAIN 分析 → 加索引 / 改写 SQL / 覆盖索引）
 6. **redo log / undo log / binlog 区别？**（redo 崩溃恢复、undo 回滚+MVCC、binlog 复制恢复，两阶段提交保证一致）
 7. **EXPLAIN 重点看什么？**（type 不能是 ALL，Extra 避免 filesort/temporary，key 要命中索引）
+ 
